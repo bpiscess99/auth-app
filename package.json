@@ -1,8 +1,8 @@
-{
+
    "scripts": {
     "start": "react-scripts start",
    },
   "dependencies": {
     "sass": "^1.57.0"
-  },
-}
+  }
+
