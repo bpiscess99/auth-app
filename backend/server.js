@@ -1,8 +1,8 @@
-const dotenv = require("dotenv").config();
+require("dotenv").config();
 const express = require('express');
 const mongoose = require('mongoose');
-const Task = require("./models/taskModel");
-const taskRoutes = require("./routes/taskRoute")
+const userRoute = require('./routes/userRoute')
+
 
 const app = express();
 
@@ -10,9 +10,9 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use("/api/tasks",taskRoutes);
 
 // Routes
+app.use("/api/users", userRoute)
 app.get('/', (req, res) => {
     res.send('home page')
   });
