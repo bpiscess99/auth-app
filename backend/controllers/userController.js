@@ -7,10 +7,11 @@ const Token = require("../models/tokenModel");
 const Cryptr = require("cryptr"); // this is use to encryption and decryption the string
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto"); // generate cryptographic keys, hashing data and encrypting/decrypting data
-const { send } = require("process");
-const { rmSync } = require("fs");
+const sendEmail = require("../utils/sendEmail")
+const {OAuth2Client} = require("google-auth-library")
 
 const cryptr = new Cryptr(process.env.CRYPTR_KEY);
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const registerUser = asyncHandler(async(req, res) => {
     const {name, email, password} = req.body
@@ -465,6 +466,285 @@ const getUsers = asyncHandler(async(req, res) => {
      res.status(200).json(users)
 });
 
+// Get login status 
+const loginStatus = asyncHandler(async (req, res) => {
+     const token = req.cookies.token;
+     if(!token){
+        return res.json(false)
+     }
+
+    //  Verify Token
+    const verified = jwt.verify(token, process.env.JWT_SECRET);
+    if(verified){
+        return res.json(true);
+    }else{
+        return res.json(false);
+    } 
+});
+
+    // Upgrade User
+    const upgradeUser = asyncHandler(async(req, res) => {
+        const {role, id} = req.body;
+
+        const user = await User.findById(id);
+
+        if(!user){
+          res.status(400);
+          throw new Error("User not found")
+        }
+
+        user.role = user;
+        await user.save();
+
+        res.status(200).json({
+            message: `User role update to ${role}`,
+        });
+    });
+
+    // Send Automated Email
+    const sendAutoMatedEmail = asyncHandler(async (req, res) => {
+       const {subject, send_to, reply_to, template, url} = req.body;
+
+       if(!subject || !send_to || !reply_to || !template){
+        res.status(500);
+        throw new Error("Missing email parameters")
+       }
+
+    //    Get user 
+    const user = await User.findOne({email: send_to})
+
+    if(!user){
+        res.status(404);
+        throw new Error("User not found");
+    }
+
+    const sent_from = process.env.EMAIL_USER;
+    const name = user.name;
+    const link = `${process.env.FRONTEND_URL}${url}`;
+
+    try {
+        await sendEmail(
+            subject,
+            send_to,
+            sent_from,
+            reply_to,
+            template,
+            name,
+            link
+        );
+        res.status(200).json({message: "Email Sent"});
+    } catch (error) {
+        res.status(500);
+        throw new Error("Email not sent, Please try again")
+    }
+    });
+
+    // Forgot Password
+    const forgotPassword = asyncHandler(async (req, res) => {
+        const {email} = req.body;
+
+        const user = await User.findOne({email});
+
+        if(!user){
+            res.status(404);
+            throw new Error("No user found");
+        }
+
+        // Delete token if it exists in DB
+        let token = await Token.findOne({userId: user._id})
+        if(token){
+            await token.deleteOne()
+        }
+
+        // Create verification Token and Save
+        const resetToken = crypto.randomBytes(32).toString("hex") + user._id;
+        console.log(resetToken);
+        
+        // Hash token and save
+        const hashedToken = hashToken(resetToken);
+        await new Token({
+            userId: user._id,
+            rToken: hashedToken,
+            createdAt: Date.now(),
+            expiresAt: Date.now() + 60 * (60 * 1000), 
+        }).save();
+
+        // Construct Reset Url
+        const resetUrl = `${process.env.FRONTEND_URL}/resetPassword/${resetToken}`;
+
+        // Send Email
+        const subject = "Password Reset Request - AUTH:Z";
+        const send_to = user.email;
+        const sent_from = process.env.EMAIL_USER;
+        const reply_to = "bumair97@gmail.com";
+        const template = "forgotPassword";
+        const name = user.name;
+        const link = resetUrl;
+
+        try {
+         await sendEmail(
+            subject,
+            send_to,
+            sent_from,
+            reply_to,
+            template,
+            name,
+            link
+         );
+         res.status(200).json({message: "Password Reset Email Sent"});     
+        } catch (error) {
+            res.status(500);
+            throw new Error("Email not sent, please try again")
+        }
+    });
+
+
+    // Reset Password 
+    const resetPassword = asyncHandler(async(req, res) => {
+        const {resetToken} = req.params;
+        const {password} = req.body;
+       console.log(resetToken);
+       console.log(password);
+        
+       const hashedToken = hashToken(resetToken);
+
+       const userToken = await Token.findOne({
+        rToken: hashedToken,
+        expiresAt: {$gt: Date.now()}
+       });
+
+       if(!userToken){
+        res.status(404)
+        throw new Error('Invalid or Expired Token');
+      }
+
+    //   Find User
+    const user = await User.findOne({_id: userToken.userId});
+
+    // Now Reset Password
+    user.password = password;
+    await user.save();
+
+    res.status(200).json({message: "Password Reset Successfully, Please Login"})
+
+    });
+
+    // Change Password
+    const changePassword = asyncHandler(async(req, res) => {
+        const {oldPassword, password} = req.body;
+        const user = await User.findOne(req.user._id);
+
+        if(!user){
+            res.status(404);
+            throw new Error("User not found");
+        }
+
+        if(!oldPassword || !password){
+            res.status(400);
+            throw new Error("Please enter old and new Password")
+        }
+
+        // Check whether old password is correct
+        const passwordIsCorrect = await bcrypt.compare(oldPassword, user.password);
+
+        // Save new Password
+        if(user && passwordIsCorrect){
+            user.password = password;
+            await user.save();
+            res.status(200).json({message: "Please change successfully, Please login"});
+        }
+    });
+
+    // Login with goole
+    const loginWithGoogle = asyncHandler(async(req, res) => {
+        const {userToken} = req.body;
+
+        const ticket = await client.verifyIdToken({
+            idToken: userToken,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+
+        const payload = ticket.getPayload();
+        const {name, email, picture, sub} = payload;
+        const password = Date.now() + sub;
+        
+        // Get UserAgent
+        const ua = parser(req.headers["user-agent"]);
+        const userAgent = [ua.ua];
+
+        // Check if user exists
+        const user = await User.findOne({email});
+
+        if(!user){
+            // Create new user
+            const newUser = await User.create({
+                name, 
+                email,
+                password,
+                photo: picture,
+                isVerified: true,
+                userAgent
+            });
+
+            if(newUser){
+                // Generate Token
+                const token = generateToken(user._id);
+
+                // Send HTTP-only token
+                res.cookie("token", token, {
+                    path: "/",
+                    httpOnly: true,
+                    expires: new Date(Date.now() + 1000 * 86400), // 1 day
+                    sameSite: "none",
+                    secure: true,
+            });
+
+            const {_id, name, email, phone, bio, photo, role, isVerified} = newUser;
+            
+            res.status(201).json({
+                _id,
+                name,
+                email,
+                phone,
+                bio,
+                photo,
+                role,
+                isVerified,
+                token
+            });
+            }
+        }
+
+        // If User exists, Login
+        if(user){
+            const token = generateToken(user._id);
+
+            // Send HTTP-only cookie
+    res.cookie("token", token, {
+        path: "/",
+        httpOnly: true,
+        expires: new Date(Date.now() + 1000 * 86400), // 1 day
+        sameSite: "none",
+        secure: true,
+      });
+        
+      const {_id, name, email, phone, bio, photo, role, isVerified} = user;
+
+      res.status(201).json({
+        _id,
+        name,
+        email,
+        phone,
+        bio,
+        photo,
+        role,
+        isVerified
+      });
+        }
+    });
+
+
+
 module.exports = {
     registerUser,
     loginUser,
@@ -476,6 +756,13 @@ module.exports = {
     getUser,
     updateUser,
     deleteUser,
-    getUsers
+    getUsers,
+    loginStatus,
+    upgradeUser,
+    sendAutoMatedEmail,
+    forgotPassword,
+    resetPassword,
+    changePassword,
+    loginWithGoogle
 
 }
