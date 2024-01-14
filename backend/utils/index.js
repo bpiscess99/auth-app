@@ -3,7 +3,7 @@ const crypto = require("crypto");
 
 // json token
 const generateToken = (id) => {
-    return jwt.sign({id}), process.env.JWT_SECRET, {expiresIn: "1d"}
+    return jwt.sign({id}, process.env.JWT_SECRET, {expiresIn: "1d"})
 };
 
 // Hash token

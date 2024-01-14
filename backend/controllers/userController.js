@@ -4,17 +4,22 @@ var parser = require("ua-parser-js") // this js library provide us the user agen
 const {generateToken, hashToken} = require("../utils/index");
 const bcrypt = require("bcryptjs");
 const Token = require("../models/tokenModel");
-const Cryptr = require("cryptr");
+const Cryptr = require("cryptr"); // this is use to encryption and decryption the string
 const jwt = require("jsonwebtoken");
-const crypto = require("crypto")
+const crypto = require("crypto"); // generate cryptographic keys, hashing data and encrypting/decrypting data
+const { send } = require("process");
+const { rmSync } = require("fs");
 
 const cryptr = new Cryptr(process.env.CRYPTR_KEY);
 
 const registerUser = asyncHandler(async(req, res) => {
     const {name, email, password} = req.body
+//    console.log('Received Data', {name, email, password})
+//    console.log('Received Headers', req.headers);
 
     // Validation 
     if(!name || !email || !password){
+        // console.log("validation failed, Please provide all emails")
         res.status(400);
         throw new Error('Please provide all fields');
     }
@@ -64,7 +69,8 @@ const registerUser = asyncHandler(async(req, res) => {
             bio,
             photo,
             role,
-            isVerified
+            isVerified,
+            token
         })
     }else{
         res.status(400)
@@ -126,6 +132,8 @@ const loginUser = asyncHandler(async (req, res) => {
             createdAt: Date.now(),
             expiresAt: Date.now() + 60 * (60 * 1000), // 60 mins
         }).save()
+        res.status(400);
+        throw new Error("New browser of device detected")
     }
     // Generate token
     const token = generateToken(user._id);
@@ -181,9 +189,293 @@ const sendLoginCode = asyncHandler(async(req, res) => {
 
     const loginCode = userToken.lToken
     const dcryptedLoginCode = cryptr.decrypt(loginCode);
+
+    // Send login code
+    const subject = "Login Access Code - AUTH:Z";
+    const send_to = email;
+    const sent_from = process.env.EMAIL_USER;
+    const reply_to = "bumair9@gmail.com";
+    const template = "loginCode";
+    const name = user.name;
+    const link = dcryptedLoginCode;
+    
+    try {
+        await sendEmail(
+            subject,
+            send_to,
+            sent_from,
+            reply_to,
+            template,
+            name,
+            link
+        );
+        res.status(200).json({message: `Access code sent to ${email}` });
+    } catch (error) {
+        res.status(500);
+        throw new Error("Email not sent, please try again");
+    }
+    
 });
+
+// Login with code 
+const loginWithCode = asyncHandler(async (req, res) => {
+    const {email} = req.params;
+    const {loginCode} = req.body;
+
+    const user = await User.findOne({email});
+
+    if(!user){
+        res.status(404)
+        throw new Error("User not found")
+    }
+      
+    // Find user login token
+    const userToken = await Token.findOne({
+        userId: user.id,
+        expiresAt: {$gt: Date.now()},
+    });
+
+    if(!userToken){
+        res.status(404);
+        throw new Error("Invalid or Expired Token, Please login again");
+    }
+
+    const dcryptedLoginCode = cryptr.decrypt(loginCode);
+
+    if(loginCode !== dcryptedLoginCode){
+        res.status(404);
+        throw new Error("Incorrect login code, Please try again")
+    }else{
+        // Register User Agent
+        const ua = parser(req.headers["user-agent"]);
+        const thisUserAgent = ua.ua;
+        user.userAgent.push(thisUserAgent);
+        await user.save();
+
+        // Generate Token
+        const token = generateToken(user._id)
+
+        // Send HTTP- only cookie
+        res.cookie("token", token, {
+            path: "/",
+      httpOnly: true,
+      expires: new Date(Date.now() + 1000 * 86400), // 1 day
+      sameSite: "none",
+      secure: true,
+        });
+
+        const {_id, name, email, phone, bio, photo, role, isVerified} = user;
+
+        res.status(200).json({
+            _id,
+            name,
+            email,
+            phone,
+            bio,
+            photo,
+            role,
+            isVerified,
+            token
+        });
+    }
+});
+
+// Send Verification Email
+const sendVerificationEmail = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id);
+
+    if(!user){
+        res.status(404);
+        throw new Error("User not found");
+    }
+
+    if(user.isVerified){
+        res.status(400);
+        throw new Error("User already verified");
+    }
+
+    // Delete Token if it exists in DB
+    let token = await Token.findOne({userId: user._id});
+    if(token){
+        await token.deleteOne();
+    }
+
+    // Create Verification Token and Save
+    const verificationToken = crypto.randomBytes(32).toString("hex") + user._id
+    console.log(VerificationToken)
+
+    // Hash token and save
+    const hashedToken = asyncHandler(async(req, res) => {
+        await new Token({
+            userId: user._id,
+            vToken: hashedToken,
+            createdAt: Date.now(),
+            expiresAt: Date.now() + 60 (60 * 1000), //60 mins
+        }).save();
+
+        // construct Verification URL
+        const verificationUrl = `${process.env.FRONTEND_URL}/verify/${verificationToken}`
+
+        // Send Email
+        const subject = "Verify Your Account - AUTH:Z"
+        const send_to = user.email;
+        const sent_from = process.env.EMAIL_USER;
+        const reply_to = "bumair9@gmail.com";
+        const template = "verifyEmail";
+        const name = user.name;
+        const link = verificationUrl;
+
+        try {
+            await sendEmail(
+                subject,
+                send_to,
+                sent_from,
+                reply_to,
+                template,
+                name,
+                link
+            );
+            res.status(200).json({message: "Verification Email Sent"});
+        } catch (error) {
+            res.status(500);
+            throw new Email("Email not sent, Please try again");
+        }
+    });
+
+});
+
+// Verify User
+const verifyUser = asyncHandler(async(req, res) => {
+    const {verificationToken} = req.params;
+
+    const hashedToken = hashToken(verificationToken);
+
+    const userToken = await Token.findOne({
+        vToken: hashedToken,
+        expiresAt: {$gt: Date.now()},
+    });
+
+    if(!userToken){
+        res.status(400);
+        throw new Error("Invalid or Expired Token");
+    }
+
+    // Find User
+    const user = await User.findOne({_id: userToken.userId})
+
+    if(user.isVerified){
+        res.status(400);
+        throw new Error("User is already verified");
+    }
+
+    // Now Verify User 
+    user.isVerified = true;
+    await user.save();
+
+    res.status(200).json({message: "Account Verification Successful"});
+
+});
+
+// Logout User
+const logoutUser = asyncHandler(async(req, res) => {
+    res.cookie("token", "", {
+    path: "/",
+    httpOnly: true,
+    expires: new Date(0), 
+    sameSite: "none",
+    secure: true,
+  });
+  return res.status(200).json({ message: "Logout successful" });
+});
+
+// Get User 
+const getUser = asyncHandler(async(req, res) => {
+   const user = await User.findById(req.user._id);
+
+   if(user){
+    const {_id, name, email, phone, bio, photo, role, isVerified} = user;
+    res.status(200).json({
+        _id,
+        name,
+        email,
+        phone,
+        bio,
+        photo,
+        role,
+        isVerified
+    });
+   }else{
+    res.status(404);
+    throw new Error("User not found");
+   }
+});
+
+// Update User
+const updateUser = asyncHandler(async(req, res) => {
+    const user = await User.findByIdAndUpdate(req.user._id)
+
+    if(user){
+        const {name, email, phone, bio, photo, role, isVerified} = user;
+
+        user.email =  email;
+        user.name = req.body.name || name;
+        user.phone = req.body.phone || phone;
+        user.bio = req.body.bio || bio;
+        user.photo = req.body.photo || photo;
+
+    const updateUser = await user.save();
+
+    res.status(200).json({
+        _id: updateUser._id,
+        name: updateUser.name,
+        email: updateUser.email,
+        phone: updateUser.phone,
+        bio: updateUser.bio,
+        photo: updateUser.photo,
+        role: updateUser.role,
+        isVerified: updateUser.isVerified,
+
+    });
+    }else{
+        res.status(400);
+        throw new Error("User not found");
+    }
+});
+
+// Delete User
+
+const deleteUser = asyncHandler(async(req, res) => {
+   const user = await User.findById(req.params.id);
+
+   if(!user){
+    res.status(404);
+    throw new Error("User not found")
+   }
+   await user.remove();
+   res.status(200).json({message: "User deleted Successfully"})
+});
+
+// Get Users
+const getUsers = asyncHandler(async(req, res) => {
+     const users = await User.find().sort("-createdAt").select("-password");
+     if(!users){
+       res.status(500);
+       throw new Error("Something went wrong")
+     }
+     res.status(200).json(users)
+});
+
 module.exports = {
     registerUser,
     loginUser,
-    sendLoginCode
+    sendLoginCode,
+    loginWithCode,
+    sendVerificationEmail,
+    verifyUser,
+    logoutUser,
+    getUser,
+    updateUser,
+    deleteUser,
+    getUsers
+
 }
