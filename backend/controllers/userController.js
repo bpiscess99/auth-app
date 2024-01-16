@@ -302,15 +302,15 @@ const sendVerificationEmail = asyncHandler(async (req, res) => {
 
   // Create Verification Token and Save
   const verificationToken = crypto.randomBytes(32).toString("hex") + user._id;
-  console.log(VerificationToken);
+  console.log(verificationToken);
 
   // Hash token and save
-  const hashedToken = asyncHandler(async (req, res) => {
+  const hashedToken = hashToken(verificationToken);
     await new Token({
       userId: user._id,
       vToken: hashedToken,
       createdAt: Date.now(),
-      expiresAt: Date.now() + 60(60 * 1000), //60 mins
+      expiresAt: Date.now() + 60 * (60 * 1000), //60 mins
     }).save();
 
     // construct Verification URL
@@ -320,7 +320,7 @@ const sendVerificationEmail = asyncHandler(async (req, res) => {
     const subject = "Verify Your Account - AUTH:Z";
     const send_to = user.email;
     const sent_from = process.env.EMAIL_USER;
-    const reply_to = "bumair9@gmail.com";
+    const reply_to = "bpiscess@outlook.com";
     const template = "verifyEmail";
     const name = user.name;
     const link = verificationUrl;
@@ -340,7 +340,6 @@ const sendVerificationEmail = asyncHandler(async (req, res) => {
       res.status(500);
       throw new Email("Email not sent, Please try again");
     }
-  });
 });
 
 // Verify User

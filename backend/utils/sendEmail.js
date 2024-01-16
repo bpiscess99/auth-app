@@ -3,6 +3,7 @@ const hbs = require("nodemailer-express-handlebars");
 const path = require("path");
 
 
+
 const sendEmail = async(
     subject,
     send_to,
@@ -25,13 +26,23 @@ const sendEmail = async(
         },
     });
 
+    // const handlearOptions = {
+    //     viewEngine: {
+    //         extName: ".handlebars",
+    //         partialDir: path.resolve("./views"),
+    //         defaultLayout: false,
+    //     },
+    //     viewPath: path.resolve(""),
+    //     extName: ".handlebars",
+    // };
+
     const handlearOptions = {
         viewEngine: {
             extName: ".handlebars",
-            partialDir: path.resolve("./views"),
+            partialDir: path.resolve(__dirname, "../views"),  // Adjust the path based on your folder structure
             defaultLayout: false,
         },
-        viewPath: path.resolve("./views"),
+        viewPath: path.resolve(__dirname, "../views"),  // Specify the full path to the views folder
         extName: ".handlebars",
     };
 
