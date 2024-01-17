@@ -177,9 +177,12 @@ const sendLoginCode = asyncHandler(async (req, res) => {
     throw new Error("User not found");
   }
 
+  
+
   // Find login code in DB
   const userToken = await Token.findOne({
     userId: user._id,
+    lToken: email,
     expiresAt: { $gt: Date.now() },
   });
 
@@ -189,16 +192,16 @@ const sendLoginCode = asyncHandler(async (req, res) => {
   }
 
   const loginCode = userToken.lToken;
-  const dcryptedLoginCode = cryptr.decrypt(loginCode);
+  const decryptedLoginCode = cryptr.decrypt(loginCode);
 
   // Send login code
   const subject = "Login Access Code - AUTH:Z";
   const send_to = email;
   const sent_from = process.env.EMAIL_USER;
-  const reply_to = "bumair9@gmail.com";
+  const reply_to = "bpisces@icould.com";
   const template = "loginCode";
   const name = user.name;
-  const link = dcryptedLoginCode;
+  const link = decryptedLoginCode;
 
   try {
     await sendEmail(
@@ -240,9 +243,9 @@ const loginWithCode = asyncHandler(async (req, res) => {
     throw new Error("Invalid or Expired Token, Please login again");
   }
 
-  const dcryptedLoginCode = cryptr.decrypt(loginCode);
+  const decryptedLoginCode = cryptr.decrypt(userToken.lToken);
 
-  if (loginCode !== dcryptedLoginCode) {
+  if (loginCode !== decryptedLoginCode) {
     res.status(404);
     throw new Error("Incorrect login code, Please try again");
   } else {
@@ -302,7 +305,7 @@ const sendVerificationEmail = asyncHandler(async (req, res) => {
 
   // Create Verification Token and Save
   const verificationToken = crypto.randomBytes(32).toString("hex") + user._id;
-  console.log(verificationToken);
+  console.log("verificationToken from URL:",verificationToken);
 
   // Hash token and save
   const hashedToken = hashToken(verificationToken);
@@ -346,15 +349,19 @@ const sendVerificationEmail = asyncHandler(async (req, res) => {
 const verifyUser = asyncHandler(async (req, res) => {
   const { verificationToken } = req.params;
 
-  const hashedToken = hashToken(verificationToken);
+  // const hashedToken = hashToken(verificationToken);
+  // console.log(hashedToken);
 
   const userToken = await Token.findOne({
-    vToken: hashedToken,
-    expiresAt: { $gt: Date.now() },
+    vToken: verificationToken,
+    expiresAt: { $gt: Date.now() }, 
   });
+  // console.log("hashedToken from Database:", hashedToken)
+  // console.log("Current Time:", Date.now());
 
   if (!userToken) {
-    res.status(400);
+    console.log("Token not found or expired");
+  res.status(400);
     throw new Error("Invalid or Expired Token");
   }
 
@@ -362,6 +369,7 @@ const verifyUser = asyncHandler(async (req, res) => {
   const user = await User.findOne({ _id: userToken.userId });
 
   if (user.isVerified) {
+    // console.log("User is already verified");
     res.status(400);
     throw new Error("User is already verified");
   }
@@ -369,9 +377,10 @@ const verifyUser = asyncHandler(async (req, res) => {
   // Now Verify User
   user.isVerified = true;
   await user.save();
-
+  // console.log("Account Verification Successful");
   res.status(200).json({ message: "Account Verification Successful" });
 });
+
 
 // Logout User
 const logoutUser = asyncHandler(async (req, res) => {
@@ -602,10 +611,10 @@ const resetPassword = asyncHandler(async (req, res) => {
   console.log(resetToken);
   console.log(password);
 
-  const hashedToken = hashToken(resetToken);
+  // const hashedToken = hashToken(resetToken);
 
   const userToken = await Token.findOne({
-    rToken: hashedToken,
+    rToken: resetToken,
     expiresAt: { $gt: Date.now() },
   });
 
