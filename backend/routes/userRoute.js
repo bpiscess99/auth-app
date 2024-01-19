@@ -16,7 +16,9 @@ const { registerUser,
      forgotPassword,
      resetPassword,
      changePassword,
-     sendLoginCode} = require('../controllers/userController');
+     sendLoginCode,
+     loginWithCode,
+     loginWithGoogle} = require('../controllers/userController');
 
 
 router.post("/register", registerUser);
@@ -35,6 +37,8 @@ router.post("/forgotPassword", forgotPassword);
 router.patch("/resetPassword/:resetToken", resetPassword);
 router.patch("/changePassword", protect, changePassword);
 router.post("/sendLoginCode/:email", sendLoginCode);
+router.post("/loginWithCode/:email", loginWithCode);
+router.post("/google/callback", loginWithGoogle);
 
     
 

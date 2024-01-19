@@ -172,28 +172,47 @@ const sendLoginCode = asyncHandler(async (req, res) => {
   const { email } = req.params;
   const user = await User.findOne({ email });
 
+  // Check if user doesn't exists
   if (!user) {
     res.status(400);
     throw new Error("User not found");
   }
 
+  // Generate 6 digit code
+  const sendCode = Math.floor(100000 + Math.random() * 900000);
+  console.log(sendCode);
+
+  // Encrypt login code before saving to DB
+  const encryptedLoginCode = cryptr.encrypt(sendCode.toString());
   
+  // Find user ID
+  const userToken = await Token.findOne({userId: user._id})
+//  Delete Token if already exists in DB
+    if(userToken){
+      await userToken.deleteOne();
+    }
 
-  // Find login code in DB
-  const userToken = await Token.findOne({
+    // Save Token to DB
+    const newToken = await new Token({
     userId: user._id,
-    lToken: email,
-    expiresAt: { $gt: Date.now() },
-  });
+    lToken: encryptedLoginCode,
+    createdAt: Date.now(),
+    expiresAt: Date.now() + 60 * (60 * 1000),
+    }).save()
+  
+  // console.log("lToken", encryptedLoginCode)
+  // console.log("User ID", user._id)
 
+  
   if (!userToken) {
     res.status(400);
     throw new Error("Invalid or Expired token, please login again");
   }
 
-  const loginCode = userToken.lToken;
-  const decryptedLoginCode = cryptr.decrypt(loginCode);
 
+  const decryptedLoginCode = cryptr.decrypt(newToken.lToken);
+  // console.log("decryptedLoginCode login code", decryptedLoginCode )
+  
   // Send login code
   const subject = "Login Access Code - AUTH:Z";
   const send_to = email;
@@ -663,7 +682,7 @@ const changePassword = asyncHandler(async (req, res) => {
   }
 });
 
-// Login with goole
+// Login with goolge
 const loginWithGoogle = asyncHandler(async (req, res) => {
   const { userToken } = req.body;
 
@@ -676,7 +695,7 @@ const loginWithGoogle = asyncHandler(async (req, res) => {
   const { name, email, picture, sub } = payload;
   const password = Date.now() + sub;
 
-  // Get UserAgent
+  // Get UserAgent (user device detail)
   const ua = parser(req.headers["user-agent"]);
   const userAgent = [ua.ua];
 
