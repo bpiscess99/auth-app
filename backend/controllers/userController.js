@@ -158,7 +158,8 @@ const loginUser = asyncHandler(async (req, res) => {
         bio,
         photo,
         role,
-        isVerified
+        isVerified,
+        token
     });
     }else{
         res.status(400)
@@ -177,19 +178,38 @@ const sendLoginCode = asyncHandler(async(req, res) => {
         throw new Error("User not found");
     }
 
+    // Generate 6 digit code 
+    const loginCode = Math.floor(100000 + Math.random() * 900000)
+    console.log("loginCode", loginCode);
+
+    // Encrypt login Code before saving to DB
+    const encryptLoginCode = cryptr.encrypt(loginCode.toString());
+    console.log("encryptLoginCode", encryptLoginCode);
+
     // Find login code in DB
-    const userToken = await Token.findOne({
+    const userToken = await Token.findOne({userId: user._id});
+    // delete token if already exists
+    if (userToken) {
+        await userToken.deleteOne();
+    }
+
+    // Save Token in DB
+    const newToken = await new Token({
         userId: user._id,
-        expiresAt: {$gt: Date.now()},
-    });
+        lToken: encryptLoginCode,
+        createdAt: Date.now(),
+        expiresAt: Date.now() + 60 * (60 * 1000),
+    }).save();
+    console.log("userId", user._id);
+    // console.log("lToken", encryptLoginCode);
 
     if(!userToken){
         res.status(400)
         throw new Error("Invalid or Expired token, please login again");
     }
 
-    const loginCode = userToken.lToken
-    const dcryptedLoginCode = cryptr.decrypt(loginCode);
+    const decryptedLoginCode = cryptr.decrypt(newToken.lToken);
+    console.log("decryptedLoginCode", decryptedLoginCode)
 
     // Send login code
     const subject = "Login Access Code - AUTH:Z";
@@ -198,7 +218,7 @@ const sendLoginCode = asyncHandler(async(req, res) => {
     const reply_to = "bumair9@gmail.com";
     const template = "loginCode";
     const name = user.name;
-    const link = dcryptedLoginCode;
+    const link = decryptedLoginCode;
     
     try {
         await sendEmail(
@@ -230,20 +250,23 @@ const loginWithCode = asyncHandler(async (req, res) => {
         throw new Error("User not found")
     }
       
+
     // Find user login token
     const userToken = await Token.findOne({
         userId: user.id,
         expiresAt: {$gt: Date.now()},
     });
+    // console.log("userToken", userToken)
 
     if(!userToken){
         res.status(404);
         throw new Error("Invalid or Expired Token, Please login again");
     }
 
-    const dcryptedLoginCode = cryptr.decrypt(loginCode);
+    const decryptedLoginCode = cryptr.decrypt(userToken.lToken);
+    // console.log(decryptedLoginCode)
 
-    if(loginCode !== dcryptedLoginCode){
+    if(loginCode !== decryptedLoginCode){
         res.status(404);
         throw new Error("Incorrect login code, Please try again")
     }else{
@@ -303,15 +326,15 @@ const sendVerificationEmail = asyncHandler(async (req, res) => {
 
     // Create Verification Token and Save
     const verificationToken = crypto.randomBytes(32).toString("hex") + user._id
-    console.log(VerificationToken)
+    console.log(verificationToken)
 
     // Hash token and save
-    const hashedToken = asyncHandler(async(req, res) => {
+    const hashedToken = hashToken(verificationToken) 
         await new Token({
             userId: user._id,
             vToken: hashedToken,
             createdAt: Date.now(),
-            expiresAt: Date.now() + 60 (60 * 1000), //60 mins
+            expiresAt: Date.now() + 60 * (60 * 1000), //60 mins
         }).save();
 
         // construct Verification URL
@@ -343,16 +366,15 @@ const sendVerificationEmail = asyncHandler(async (req, res) => {
         }
     });
 
-});
 
 // Verify User
 const verifyUser = asyncHandler(async(req, res) => {
     const {verificationToken} = req.params;
 
-    const hashedToken = hashToken(verificationToken);
+    // const hashedToken = hashToken(verificationToken);
 
     const userToken = await Token.findOne({
-        vToken: hashedToken,
+        vToken: verificationToken,
         expiresAt: {$gt: Date.now()},
     });
 
@@ -438,7 +460,7 @@ const updateUser = asyncHandler(async(req, res) => {
 
     });
     }else{
-        res.status(400);
+        res.status(404);
         throw new Error("User not found");
     }
 });
@@ -452,7 +474,7 @@ const deleteUser = asyncHandler(async(req, res) => {
     res.status(404);
     throw new Error("User not found")
    }
-   await user.remove();
+   await user.deleteOne();
    res.status(200).json({message: "User deleted Successfully"})
 });
 
@@ -493,7 +515,7 @@ const loginStatus = asyncHandler(async (req, res) => {
           throw new Error("User not found")
         }
 
-        user.role = user;
+        user.role = role;
         await user.save();
 
         res.status(200).json({
@@ -606,10 +628,10 @@ const loginStatus = asyncHandler(async (req, res) => {
        console.log(resetToken);
        console.log(password);
         
-       const hashedToken = hashToken(resetToken);
+    //    const hashedToken = hashToken(resetToken);
 
        const userToken = await Token.findOne({
-        rToken: hashedToken,
+        rToken: resetToken,
         expiresAt: {$gt: Date.now()}
        });
 
@@ -655,7 +677,7 @@ const loginStatus = asyncHandler(async (req, res) => {
         }
     });
 
-    // Login with goole
+    // Login with google
     const loginWithGoogle = asyncHandler(async(req, res) => {
         const {userToken} = req.body;
 

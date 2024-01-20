@@ -40,7 +40,7 @@ const userSchema = mongoose.Schema(
         default: "subscriber",
         // subscriber, author, and admin 
      },
-     isVerfied: {
+     isVerified: {
         type: Boolean,
         default: false,
      },
