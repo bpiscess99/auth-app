@@ -682,7 +682,7 @@ const changePassword = asyncHandler(async (req, res) => {
   }
 });
 
-// Login with goolge
+// Login with google
 const loginWithGoogle = asyncHandler(async (req, res) => {
   const { userToken } = req.body;
 
