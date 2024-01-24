@@ -24,20 +24,20 @@ const login = async (userData) => {
 };
 
 // Logout User 
-const logout = async (userData) => {
-    const response = await axios.get(API_URL + "logout", userData);
+const logout = async () => {
+    const response = await axios.get(API_URL + "logout");
     return response.data;;
 };
 
 // Get Login Status
-const getLoginStatus = async (userData) => {
-    const response = await axios.get(API_URL + "getLoginStatus", userData);
+const getLoginStatus = async () => {
+    const response = await axios.get(API_URL + "getLoginStatus");
     return response.data;
 };
 
 // Get User Profile
-const getUserProfile = async (userData) => {
-    const response = await axios.get(API_URL + "getUserProfile", userData);
+const getUser = async () => {
+    const response = await axios.get(API_URL + "getUser");
     return response.data;
 };
 
@@ -123,7 +123,7 @@ const authService = {
     login,
     logout,
     getLoginStatus,
-    getUserProfile,
+    getUser,
     updateProfile,
     sendVerificationEmail,
     verifyUser,
