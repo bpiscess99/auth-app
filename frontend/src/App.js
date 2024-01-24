@@ -14,12 +14,15 @@ import Verify from './pages/auth/Verify';
 import Profile from './pages/profile/Profile';
 import ChangePassword from './pages/changePassword/ChangePassword';
 import UserList from './pages/userList/UserList';
+import {ToastContainer} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 function App() {
   return (
     <>
      <Router>
+      <ToastContainer/>
      <Routes>
       <Route path="/" element={<Layout> <Home/> </Layout>}/>
       <Route path="/login" element={<Login/>}/>

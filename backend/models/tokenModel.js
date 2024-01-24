@@ -27,11 +27,7 @@ const tokenSchema = mongoose.Schema({
         type: Date,
         required: true,
     },
-},
-{
-    timestamps: true
-}
-);
+});
 
 
 const Token = mongoose.model("Token", tokenSchema)

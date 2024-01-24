@@ -22,16 +22,20 @@ app.use(cookieParser())
 // Error Middleware
 app.use(errorHandler)
 
+
 // Routes
 app.use("/api/users", userRoute)
 app.get('/', (req, res) => {
     res.send('home page')
   });
 
+
+// Error Handler
+app.use(errorHandler); 
+
   mongoose.set('strictQuery', false);
   const PORT = process.env.PORT || 5000;
   
-
   mongoose.connect(process.env.MONGO_URI)
   .then(() => {
   app.listen(PORT, () => {

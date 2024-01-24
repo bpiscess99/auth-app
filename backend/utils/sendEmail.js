@@ -3,7 +3,6 @@ const hbs = require("nodemailer-express-handlebars");
 const path = require("path");
 
 
-
 const sendEmail = async(
     subject,
     send_to,
@@ -32,7 +31,7 @@ const sendEmail = async(
     //         partialDir: path.resolve("./views"),
     //         defaultLayout: false,
     //     },
-    //     viewPath: path.resolve(""),
+    //     viewPath: path.resolve("./views"),
     //     extName: ".handlebars",
     // };
 
