@@ -32,7 +32,7 @@ const userSchema = mongoose.Schema(
      },
      bio : {
         type: String,
-        default: "bio"
+        bio: "bio"
      },
      role: {
         type: String,
