@@ -4,9 +4,9 @@ const {protect, adminOnly, authorOnly} = require("../middlewares/authMiddleware"
 const { registerUser, loginUser, logoutUser, getUsers, updateUser, deleteUser, getUser, loginStatus, upgradeUser, sendAutoMatedEmail, sendVerificationEmail, verifyUser, forgotPassword, resetPassword, changePassword, sendLoginCode, loginWithCode } = require('../controllers/userController');
 
 
-router.post("/registerUser", registerUser);
-router.post("/loginUser", loginUser);
-router.get("/logoutUser", logoutUser);
+router.post("/register", registerUser);
+router.post("/login", loginUser);
+router.get("/logout", logoutUser);
 router.get("/getUser", protect, getUser);
 router.patch("/updateUser", protect, updateUser);
 router.delete("/:id",protect, adminOnly, deleteUser);

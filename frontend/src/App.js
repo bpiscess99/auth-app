@@ -16,9 +16,24 @@ import ChangePassword from './pages/changePassword/ChangePassword';
 import UserList from './pages/userList/UserList';
 import {ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import axios from "axios";
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { loginStatus, getUser, selectIsLoggedIn, selectUser } from './redux/features/auth/authSlice';
 
+axios.defaults.withCredentials = true;
 
 function App() {
+  const dispatch = useDispatch();
+  const isLoggedIn = useSelector(selectIsLoggedIn);
+  const user = useSelector(selectUser);
+  
+  useEffect(() => {
+   dispatch(loginStatus());
+   if(isLoggedIn && user === null){
+    dispatch(getUser());
+   }
+  }, [dispatch, isLoggedIn, user])
   return (
     <>
      <Router>

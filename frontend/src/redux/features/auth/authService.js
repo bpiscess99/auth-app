@@ -1,10 +1,14 @@
 import axios from 'axios';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+console.log('Process Environment:', process.env);
+console.log('REACT_APP_BACKEND_URL:', process.env.REACT_APP_BACKEND_URL);
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL
+console.log("BACKEND_URL", BACKEND_URL)
 export const API_URL = `${BACKEND_URL}/api/users/`;
+console.log("API_URL", API_URL)
 
 // Validate Email
-export const validateEmail = (email) => {
+export const validateEmail = (email) => {   
     return email.match(
         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
@@ -30,8 +34,8 @@ const logout = async () => {
 };
 
 // Get Login Status
-const getLoginStatus = async () => {
-    const response = await axios.get(API_URL + "getLoginStatus");
+const loginStatus = async () => {
+    const response = await axios.get(API_URL + "loginStatus");
     return response.data;
 };
 
@@ -122,7 +126,7 @@ const authService = {
     register,
     login,
     logout,
-    getLoginStatus,
+    loginStatus,
     getUser,
     updateProfile,
     sendVerificationEmail,

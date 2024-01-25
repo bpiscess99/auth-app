@@ -71,11 +71,11 @@ export const logout = createAsyncThunk(
             );
 
 // Get Login Status
-export const getLoginStatus = createAsyncThunk(
-    "auth/getLoginStatus",
+export const loginStatus = createAsyncThunk(
+    "auth/loginStatus",
     async(_, thunkAPI) => {
         try {
-            return await authService.getLoginStatus();
+            return await authService.loginStatus();
         } catch (error) {
             const message = 
             (error.response &&
@@ -423,16 +423,16 @@ const authSlice = createSlice({
         toast.error(action.payload);
     })
     // Get Login Status
-    .addCase(getLoginStatus.pending, (state) => {
+    .addCase(loginStatus.pending, (state) => {
         state.isLoading = true;
     })
-    .addCase(getLoginStatus.fulfilled, (state, action) => {
+    .addCase(loginStatus.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
         state.isLoggedIn = action.payload;
         console.log(action.payload);
     })
-    .addCase(getLoginStatus.rejected, (state, action) => {
+    .addCase(loginStatus.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.message = action.payload;
