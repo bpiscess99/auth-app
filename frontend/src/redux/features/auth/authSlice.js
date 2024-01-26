@@ -430,7 +430,7 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.isSuccess = true;
         state.isLoggedIn = action.payload;
-        console.log(action.payload);
+        toast.success(action.payload);
     })
     .addCase(loginStatus.rejected, (state, action) => {
         state.isLoading = false;

@@ -4,6 +4,7 @@ import styles from './auth.module.scss';
 import { BiLogIn } from 'react-icons/bi';
 import { Link } from 'react-router-dom';
 import PasswordInput from '../../components/passwordInput/PasswordInput.js';
+import {toast} from 'react-toastify';
 
 
 const Login = () => {
@@ -41,9 +42,20 @@ const loginUser = () => {
         
         <form onSubmit={loginUser}>
 
-      <input type="email" placeholder='Email' required name='email' value={email} onChange={handleInputChange} />
+      <input 
+      type="email" 
+      placeholder='Email' 
+      required name='email' 
+      value={email} 
+      onChange={handleInputChange} 
+      />
        
-       <PasswordInput placeholder='Password' name='password' value={password} onChange={handleInputChange}/>
+       <PasswordInput 
+       placeholder='Password' 
+       name='password' 
+       value={password} 
+       onChange={handleInputChange}
+       />
       {/* <input type="password" placeholder='Password' required name='password' value={password} onChange={handleInputChange} /> */} 
 
       <button type='submit' className="--btn --btn-primary --btn-block">Login

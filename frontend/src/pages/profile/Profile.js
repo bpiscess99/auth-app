@@ -1,21 +1,50 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Card from '../../components/card/Card';
 import profileImg from '../../assets/avatarr.png'
 import './Profile.scss';
 import PageMenu from '../../components/pageMenu/PageMenu';
+import { 
+  getUser,
+  selectUser,
+  updateUser
+} from '../../redux/features/auth/authSlice';
+import Loader from '../../components/loader/Loader';
+import {toast} from 'react-toastify';
+import useRedirectLoggedOutUser from '../../customHook/useRedirectLoggedOutUser';
+import { useDispatch, useSelector } from 'react-redux';
+
+export const shortenText = (text, n) => {
+  if(text.length > n){
+    const shortenedText = text.substring(0, n).concat("...");
+    return shortenedText;
+  }
+  return text;
+};
 
 const initialState ={
-     name : "Umair",
-     email : "bumair97@gmail.com",
-     phone : "",
-     bio : "",
-     photo : "",
-     role : "",
-     isVerified : false,
-}
+     name : user?.name || "",
+     email : user?.email || "",
+     phone : user?.phone || "",
+     bio : user?.bio || "",
+     photo : user?.photo || "",
+     role : user?.role || "",
+     isVerified : user?.isVerified || false,
+};
 
 const Profile = () => {
-const [profile, setProfile] = useState(initialState)
+   useRedirectLoggedOutUser("/login");
+   const dispatch = useDispatch();
+   const {isLoading, isLoggedIn, IsSuccess, user, message} = useSelector(
+    (state) => state.auth
+   );
+
+const [profile, setProfile] = useState(initialState);
+const [profileImage, setProfileImage] = useState(null);
+const [imagePreview, setImagePreview] = useState(initialState);
+
+useEffect(() => {
+  dispatch(getUser());
+}, [dispatch]);
 
 const handleImageChange = () => {
 
@@ -23,6 +52,35 @@ const handleImageChange = () => {
 
 const handleInputChange = () => {
 
+};
+
+const saveProfile = async (e) => {
+  e.preventDefault();
+  let imageURL;
+  try {
+    if(
+      profileImage !== null &&
+      (profileImage.type === "image/jpeg" ||
+      profileImage.type === "image/jpg" ||
+      profileImage.type === "image/png")
+    ){
+      const image = new FormData();
+      image.append("file", image);
+      image.append("upload_preset", "authentication");
+      image.append("cloud_name", "umairdev");
+
+      // Save Image to cloudinary & umairdev is my cloudinary name
+      const response = await fetch(
+        "https://api.cloudinary.com/v1_1/umairdev/image/upload",
+        {method: "post", body: image}
+      );
+      const imgData = await response.json();
+      console.log(imgData);
+      imageURL = image.url.toString();
+    }
+  } catch (error) {
+    
+  }
 }
 
   return (

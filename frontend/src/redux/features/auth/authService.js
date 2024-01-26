@@ -1,11 +1,10 @@
 import axios from 'axios';
 
 console.log('Process Environment:', process.env);
-console.log('REACT_APP_BACKEND_URL:', process.env.REACT_APP_BACKEND_URL);
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL
-console.log("BACKEND_URL", BACKEND_URL)
+const BACKEND_URL = process.env.REACT_APP_SERVER_URL;
+console.log("BACKEND_URL", BACKEND_URL);
 export const API_URL = `${BACKEND_URL}/api/users/`;
-console.log("API_URL", API_URL)
+console.log("API_URL", API_URL);
 
 // Validate Email
 export const validateEmail = (email) => {   
@@ -17,7 +16,10 @@ export const validateEmail = (email) => {
 
 // Register User
 const register = async (userData) => {
-    const response = await axios.post(API_URL + "register", userData);
+    const response = await axios.post(API_URL + "register", userData,
+    {withCredentials: true}
+    );
+    console.log("response", response)
     return response.data;
 };
 
@@ -54,6 +56,7 @@ const updateProfile = async (userData) => {
 // Send Verification Email
 const sendVerificationEmail = async () => {
     const response = await axios.post(API_URL + "sendVerificationEmail");
+    // const response = await axios.post("http://localhost:5000/api/users/sendVerificationEmail");
     return response.data.message;
 };
 
