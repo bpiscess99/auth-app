@@ -48,8 +48,8 @@ const getUser = async () => {
 };
 
 // Update Profile
-const updateProfile = async (userData) => {
-    const response = await axios.patch(API_URL + "updateProfile", userData);
+const updateUser = async (userData) => {
+    const response = await axios.patch(API_URL + "updateUser", userData);
     return response.data;
 };
 
@@ -131,7 +131,7 @@ const authService = {
     logout,
     loginStatus,
     getUser,
-    updateProfile,
+    updateUser,
     sendVerificationEmail,
     verifyUser,
     changePassword,
