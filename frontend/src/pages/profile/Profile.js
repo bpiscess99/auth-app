@@ -157,7 +157,8 @@ useLayoutEffect(() => {
            />
            </p>
  
-           <p><label>Email:</label>
+           <p>
+            <label>Email:</label>
            <input 
            type="email" 
            name="email" 
