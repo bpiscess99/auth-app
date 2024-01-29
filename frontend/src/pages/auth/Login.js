@@ -1,27 +1,80 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Card from '../../components/card/Card';
 import styles from './auth.module.scss';
 import { BiLogIn } from 'react-icons/bi';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import PasswordInput from '../../components/passwordInput/PasswordInput.js';
 import {toast} from 'react-toastify';
+import { validateEmail } from '../../redux/features/auth/authService.js';
+import { login, sendLoginCode, RESET, loginWithGoogle } from '../../redux/features/auth/authSlice.js';
+import {GoogleLogin} from '@react-oauth/google';
+import { useDispatch, useSelector } from 'react-redux';
+import Loader from '../../components/loader/Loader.js';
 
+const initialState = {
+  email: "",
+  password: "",
+}
 
 const Login = () => {
-const [email, setEmail] = useState("")
-const [password, setPassword] = useState("")
+const [formData, setFormData] = useState(initialState);
+const {email, password} = formData;
 
-const handleInputChange = () =>{
-  
-}
+const handleInputChange = (e) =>{
+  const {name, value} = e.target;
+  setFormData({...formData, [name]: value});
+};
 
-const loginUser = () => {
+const dispatch = useDispatch();
+const navigate = useNavigate();
 
-}
+const {isLoading, isLoggedIn, isSuccess, message, isError, twoFactor} = 
+useSelector((state) => state.auth );
+
+const loginUser = async (e) => {
+  e.preventDefault();
+
+  if(!email || !password){
+    return toast.error("All fields are required");
+  }
+
+  if(!validateEmail(email)){
+    toast.error("Please enter a valid email");
+  }
+
+  const userData = {
+    email,
+    password
+  };
+
+  await dispatch(login(userData));
+   
+};
+
+useEffect(() => {
+  if(isSuccess && isLoggedIn){
+    navigate("/profile")
+  }
+
+  if(isError && twoFactor){
+    dispatch(sendLoginCode(email));
+    navigate(`/loginWithCode/${email}`)
+  }
+
+  dispatch(RESET());
+}, [isLoading, isError, isLoggedIn, message, dispatch, twoFactor, email]);
+
+const googleLogin = async (credentialResponse) => {
+  console.log(credentialResponse);
+  await dispatch(
+    loginWithGoogle({userToken: credentialResponse.credential})
+  );
+};
+
 
   return ( 
   <div className={`container ${styles.auth}`}>
-      
+   {isLoading && <Loader/>}      
       <Card>
         <div className={styles.form}>
         
@@ -32,9 +85,16 @@ const loginUser = () => {
         <h2>Login</h2>
 
         <div className="--flex-center">
-         <button className="--btn --btn-google">
+         {/* <button className="--btn --btn-google">
             Login with Google
-         </button>
+         </button> */}
+         <GoogleLogin
+         onSuccess={googleLogin}
+         onError={() => {
+          console.log("Login Failed");
+          toast.error("Login Failed")
+         }}
+         />
         </div>
 
         <br />
@@ -66,14 +126,14 @@ const loginUser = () => {
       <Link to='/forgot'>Forgot Password</Link>
       <span className={styles.register}>
         <Link to='/'>Home</Link>
-        <p>&nbsp;Don't have an account?&nbsp;</p>
+        <p>&nbsp;Don't have an account? &nbsp;</p>
         <Link to='/register'>Register</Link>
       </span>
          
      </div>
       </Card>
     </div>
-)  
-}
+);  
+};
 
 export default Login;

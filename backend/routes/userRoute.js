@@ -1,7 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const {protect, adminOnly, authorOnly} = require("../middlewares/authMiddleware");
-const { registerUser, loginUser, logoutUser, getUsers, updateUser, deleteUser, getUser, loginStatus, upgradeUser, sendAutoMatedEmail, sendVerificationEmail, verifyUser, forgotPassword, resetPassword, changePassword, sendLoginCode, loginWithCode } = require('../controllers/userController');
+const { registerUser, loginUser, logoutUser, getUsers, updateUser, 
+    deleteUser, getUser, loginStatus, upgradeUser, sendAutoMatedEmail, 
+    sendVerificationEmail, verifyUser, forgotPassword, resetPassword, 
+    changePassword, sendLoginCode, loginWithCode, loginWithGoogle } = require('../controllers/userController');
 
 
 router.post("/register", registerUser);
@@ -19,8 +22,9 @@ router.patch("/verifyUser/:verificationToken", verifyUser);
 router.post("/forgotPassword", forgotPassword);
 router.patch("/resetPassword/:resetToken", resetPassword);
 router.patch("/changePassword",protect, changePassword);
-router.post("/sendLoginCode/:email", sendLoginCode)
-router.post("/loginWithCode/:email", loginWithCode)
+router.post("/sendLoginCode/:email", sendLoginCode);
+router.post("/loginWithCode/:email", loginWithCode);
+router.post("google/callback", loginWithGoogle)
 
     
 

@@ -20,6 +20,7 @@ import axios from "axios";
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginStatus, getUser, selectIsLoggedIn, selectUser } from './redux/features/auth/authSlice';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 axios.defaults.withCredentials = true;
 
@@ -38,6 +39,9 @@ function App() {
     <>
      <Router>
       <ToastContainer/>
+      <GoogleOAuthProvider clientId={process.env.GOOGLE_CLIENT_ID}>
+      console.log("GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
+
      <Routes>
       <Route path="/" element={<Layout> <Home/> </Layout>}/>
       <Route path="/login" element={<Login/>}/>
@@ -50,6 +54,7 @@ function App() {
       <Route path="/changePassword" element={<Layout><ChangePassword/></Layout>}/>
       <Route path="/users" element={<Layout><UserList/></Layout>}/>
      </Routes>
+     </GoogleOAuthProvider>
      </Router> 
     </>
   );
