@@ -62,7 +62,7 @@ useEffect(() => {
   }
 
   dispatch(RESET());
-}, [isLoading, isError, isLoggedIn, message, dispatch, twoFactor, email]);
+}, [isLoading, isError, isSuccess, isLoggedIn, message, dispatch, twoFactor, email]);
 
 const googleLogin = async (credentialResponse) => {
   console.log(credentialResponse);
@@ -70,7 +70,6 @@ const googleLogin = async (credentialResponse) => {
     loginWithGoogle({userToken: credentialResponse.credential})
   );
 };
-
 
   return ( 
   <div className={`container ${styles.auth}`}>

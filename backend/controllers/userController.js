@@ -14,7 +14,7 @@ const cryptr = new Cryptr(process.env.CRYPTR_KEY);
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const registerUser = asyncHandler(async(req, res) => {
-    const {name, email, password} = req.body
+    const {name, email, password} = req.body;
 //    console.log('Received Data', {name, email, password})
 //    console.log('Received Headers', req.headers);
 

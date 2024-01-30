@@ -35,13 +35,13 @@ function App() {
     dispatch(getUser());
    }
   }, [dispatch, isLoggedIn, user])
+
+  
   return (
     <>
      <Router>
       <ToastContainer/>
-      <GoogleOAuthProvider clientId={process.env.GOOGLE_CLIENT_ID}>
-      console.log("GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
-
+      <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
      <Routes>
       <Route path="/" element={<Layout> <Home/> </Layout>}/>
       <Route path="/login" element={<Login/>}/>
