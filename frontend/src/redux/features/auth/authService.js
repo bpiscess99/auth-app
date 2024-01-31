@@ -1,10 +1,7 @@
 import axios from 'axios';
 
-console.log('Process Environment:', process.env);
 const BACKEND_URL = process.env.REACT_APP_SERVER_URL;
-console.log("BACKEND_URL", BACKEND_URL);
 export const API_URL = `${BACKEND_URL}/api/users/`;
-console.log("API_URL", API_URL);
 
 // Validate Email
 export const validateEmail = (email) => {   

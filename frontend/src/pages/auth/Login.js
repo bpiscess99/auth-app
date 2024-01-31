@@ -6,7 +6,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import PasswordInput from '../../components/passwordInput/PasswordInput.js';
 import {toast} from 'react-toastify';
 import { validateEmail } from '../../redux/features/auth/authService.js';
-import { login, sendLoginCode, RESET, loginWithGoogle } from '../../redux/features/auth/authSlice.js';
+import { 
+  login, 
+  sendLoginCode, 
+  RESET, 
+  loginWithGoogle 
+} from '../../redux/features/auth/authSlice.js';
 import {GoogleLogin} from '@react-oauth/google';
 import { useDispatch, useSelector } from 'react-redux';
 import Loader from '../../components/loader/Loader.js';
@@ -62,7 +67,7 @@ useEffect(() => {
   }
 
   dispatch(RESET());
-}, [isLoading, isError, isSuccess, isLoggedIn, message, dispatch, twoFactor, email]);
+}, [isLoading, isError, isSuccess, isLoggedIn, message, dispatch, twoFactor, email, navigate]);
 
 const googleLogin = async (credentialResponse) => {
   console.log(credentialResponse);
@@ -117,7 +122,8 @@ const googleLogin = async (credentialResponse) => {
        />
       {/* <input type="password" placeholder='Password' required name='password' value={password} onChange={handleInputChange} /> */} 
 
-      <button type='submit' className="--btn --btn-primary --btn-block">Login
+      <button type='submit' className="--btn --btn-primary --btn-block">
+        Login
         </button>  
         
         </form>

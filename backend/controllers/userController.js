@@ -8,7 +8,7 @@ const Cryptr = require("cryptr"); // this is use to encryption and decryption th
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto"); // generate cryptographic keys, hashing data and encrypting/decrypting data
 const sendEmail = require("../utils/sendEmail")
-const {OAuth2Client} = require("google-auth-library")
+const {OAuth2Client} = require("google-auth-library") // login with google
 
 const cryptr = new Cryptr(process.env.CRYPTR_KEY);
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);

@@ -24,7 +24,7 @@ router.patch("/resetPassword/:resetToken", resetPassword);
 router.patch("/changePassword",protect, changePassword);
 router.post("/sendLoginCode/:email", sendLoginCode);
 router.post("/loginWithCode/:email", loginWithCode);
-router.post("google/callback", loginWithGoogle)
+router.post("/google/callback", loginWithGoogle)
 
     
 
