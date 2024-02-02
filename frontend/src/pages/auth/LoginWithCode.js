@@ -33,7 +33,7 @@ const loginUserWithCode = async (e) => {
   if(loginCode === ""){
     return toast.error("Please fill in the login code");
   }
-  if(loginCode !== 6){
+  if(loginCode.length !== 6){
     return toast.error("Access code must be 6 character");
   }
 

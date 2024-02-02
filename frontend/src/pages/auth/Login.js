@@ -71,10 +71,12 @@ useEffect(() => {
 
 const googleLogin = async (credentialResponse) => {
   console.log(credentialResponse);
+  console.log(googleLogin)
   await dispatch(
     loginWithGoogle({userToken: credentialResponse.credential})
   );
-};
+};  
+
 
   return ( 
   <div className={`container ${styles.auth}`}>
@@ -98,6 +100,7 @@ const googleLogin = async (credentialResponse) => {
           console.log("Login Failed");
           toast.error("Login Failed")
          }}
+         useOneTap
          />
         </div>
 

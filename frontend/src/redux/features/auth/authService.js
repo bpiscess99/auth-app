@@ -111,8 +111,8 @@ const sendLoginCode = async (email) => {
 };
 
 // Login with Code
-const loginWithCode = async (email, code) => {
-    const response = await axios.get(API_URL + `loginWithCode/${email}`, code);
+const loginWithCode = async (code, email) => {
+    const response = await axios.post(API_URL + `loginWithCode/${email}`, code);
     return response.data;
 };
 

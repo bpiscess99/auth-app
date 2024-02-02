@@ -471,6 +471,7 @@ const authSlice = createSlice({
         state.message = action.payload;
         toast.error(action.payload);
     })
+    // sendVerificationEmail
     .addCase(sendVerificationEmail.pending, (state) => {
         state.isLoading = true;
     })
@@ -486,6 +487,7 @@ const authSlice = createSlice({
         state.message = action.payload;
         toast.error(action.payload);
     })
+    // Verify User
     .addCase(verifyUser.pending, (state) => {
         state.isLoading = true;
     })
@@ -603,14 +605,14 @@ const authSlice = createSlice({
         state.isLoading = true;
     })
     .addCase(sendLoginCode.fulfilled, (state, action) => {
-        state.isLoading = true;
+        state.isLoading = false;
         state.isSuccess = true;
         state.message = action.payload;
         toast.success(action.payload);
     })
     .addCase(sendLoginCode.rejected, (state, action) => {
         state.isLoading = false;
-        state.isError = false;
+        state.isError = true;
         state.message = action.payload;
         toast.error(action.payload);
     })
@@ -645,6 +647,7 @@ const authSlice = createSlice({
         state.isLoggedIn = true;
         state.user = action.payload;
         toast.success("Login Successful");
+        console.log(action.payload)
     })
     .addCase(loginWithGoogle.rejected, (state, action) => {
         state.isLoading = false;
