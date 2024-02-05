@@ -2,14 +2,14 @@ import {createSlice} from '@reduxjs/toolkit';
 
 
 const initialState = {
-    filteredReducer: [],
+    filteredUsers: [],
 };
 
 const filterSlice = createSlice({
     name: "filter",
     initialState,
     reducers: {
-        FILTER_USER(state, action) {
+        FILTER_USERS(state, action) {
             const {users, search} = action.payload;
             const tempUsers = users.filter(
                 (user) => 
@@ -21,7 +21,7 @@ const filterSlice = createSlice({
     },
 });
 
-export const {FILTER_USER} = filterSlice.actions;
+export const {FILTER_USERS} = filterSlice.actions;
 export const selectUsers = (state) => state.filter.filteredUsers;
 
 export default filterSlice.reducer;

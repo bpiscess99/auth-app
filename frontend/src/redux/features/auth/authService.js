@@ -57,13 +57,26 @@ const sendVerificationEmail = async () => {
     return response.data.message;
 };
 
-// Verify User
+// // Verify User
+// const verifyUser = async (verificationToken) => {
+//     const response = await axios.patch(
+//         `${API_URL}verifyUser/${verificationToken}`
+//         );
+//     return response.data.message;
+// };
+
 const verifyUser = async (verificationToken) => {
-    const response = await axios.patch(
-        `${API_URL}verifyUser/${verificationToken}`
-        );
-    return response.data.message;
-};
+    const url = `${API_URL}verifyUser/${verificationToken}`;
+    console.log('Request URL:', url);
+  
+    try {
+      const response = await axios.patch(url);
+      return response.data.message;
+    } catch (error) {
+      console.log(error)
+    }
+  };
+  
 
 // Change Password
 const changePassword = async (userData) => {

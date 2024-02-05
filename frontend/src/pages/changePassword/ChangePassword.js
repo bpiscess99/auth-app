@@ -3,6 +3,15 @@ import Card from '../../components/card/Card';
 import PageMenu from '../../components/pageMenu/PageMenu';
 import PasswordInput from '../../components/passwordInput/PasswordInput';
 import './ChangePassword.scss';
+import { useDispatch, useSelector } from 'react-redux';
+import { changePassword, RESET, logout } from '../../redux/features/auth/authSlice';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import useRedirectLoggedOutUser from '../../customHook/useRedirectLoggedOutUser'
+import { Spinner } from '../../components/loader/Loader';
+import { sendAutomatedEmail } from '../../redux/features/email/emailSlice';
+
+
 
 const initialState ={
      oldPassword : "",
@@ -12,13 +21,48 @@ const initialState ={
 }
 
 const ChangePassword = () => {
-const [formData, setFormData] = useState(initialState)
-const { oldPassword, password, password2 } = formData
+useRedirectLoggedOutUser("/login");
+const [formData, setFormData] = useState(initialState);
+const { oldPassword, password, password2 } = formData;
 
-const handleInputChange = () => {
+const {isLoading, user} = useSelector((state) => state.auth);
+const dispatch = useDispatch();
+const navigate = useNavigate();
 
+const handleInputChange = (e) => {
+    const {name, value} = e.target;
+    setFormData({...formData, [name]: value})
+};
+
+const updatePassword = async(e) => {
+  e.preventDefault();
+
+  if(!oldPassword || !password || !password2){
+    toast.error("All fields are required");
+  }
+  if(password !== password2){
+    toast.error("Password do not match");
 }
 
+const userData = {
+  oldPassword,
+  password
+}
+
+const emailData = {
+  subject: "Password Changed AUTH:Z",
+  send_to: user.email,
+  reply_to: "noreply@gmail.com",
+  template: "changePassword",
+  url: "/forgot",
+};
+
+await dispatch(changePassword(userData));
+await dispatch(sendAutomatedEmail(emailData));
+await dispatch(logout());
+await dispatch(RESET(userData));
+navigate("/login")
+}
   return (
     <>
      <section>
@@ -30,23 +74,43 @@ const handleInputChange = () => {
         <Card cardClass={"card"}>
          <>
          
-          <form>
+          <form onSubmit={updatePassword}>
 
           <p><label>Current Password</label>
-    <PasswordInput placeholder='Old Password' name='oldPassword' value={oldPassword} onChange={handleInputChange}/>
+    <PasswordInput 
+    placeholder='Old Password' 
+    name='oldPassword' 
+    value={oldPassword} 
+    onChange={handleInputChange}/>
     </p>
 
            <p><label>New Password</label>
-           <PasswordInput placeholder='Password' name='password' value={password} onChange={handleInputChange}/>
+           <PasswordInput 
+           placeholder='Password' 
+           name='password' 
+           value={password} 
+           onChange={handleInputChange}
+           />
            </p>
  
            <p><label>Confirm New Password</label>
-           <PasswordInput placeholder='Confirm Password' name='password2' value={password2} onChange={handleInputChange}/>
+           <PasswordInput 
+           placeholder='Confirm Password' 
+           name='password2' 
+           value={password2} 
+           onChange={handleInputChange}
+           />
            </p>
 
-           <button className="--btn --btn-danger --btn-block">Change Password
+          {isLoading ? (
+            <Spinner/>
+          ): (
+           <button 
+           type='submit'
+           className="--btn --btn-danger --btn-block">
+            Change Password
         </button>  
-
+          )}
           </form>
 
          </>
@@ -57,6 +121,6 @@ const handleInputChange = () => {
       </section> 
     </>
   )
-}
+};
 
 export default ChangePassword;

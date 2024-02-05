@@ -5,7 +5,6 @@ import './Profile.scss';
 import PageMenu from '../../components/pageMenu/PageMenu';
 import { 
   getUser,
-  selectUser,
   updateUser
 } from '../../redux/features/auth/authSlice';
 import Loader from '../../components/loader/Loader';

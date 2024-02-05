@@ -1,9 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Card from '../../components/card/Card';
 import styles from './auth.module.scss';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { MdPassword } from 'react-icons/md';
 import PasswordInput from '../../components/passwordInput/PasswordInput';
+import { RESET, resetPassword } from '../../redux/features/auth/authSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
+import Loader from '../../components/loader/Loader';
+
 
 const initialState = {
     password: "",
@@ -14,17 +19,47 @@ const Reset = () => {
     const [formData, setFormData] = useState(initialState);
     const {password, password2} = formData;
 
-const handleInputChange = () =>{
-  
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const {resetToken} = useParams;
+    console.log(resetToken);
+
+    const {isLoading, isSuccess, message} = useSelector((state) => state.auth);
+
+const handleInputChange = (e) =>{
+  const {name, value} = e.target;
+  setFormData({...formData, [name]: value})
+};
+
+const reset = async (e) => {
+  e.preventDefault();
+
+  if(password.length < 6){
+    toast.error("Password length must be 6 characters");
+  }
+  if(password !== password2){
+    toast.error("Password do not match");
+  }
+
+  const userData = {
+    password,
+  }
+
+  await dispatch(resetPassword({userData, resetToken}))
 }
 
-const loginUser = () => {
+useEffect(() => {
+  if(isSuccess && message.includes("Reset Successful")){
+    navigate("/login")
+  }
 
-}
+  dispatch(RESET())
+}, [dispatch, navigate, message, isSuccess])
+
 
   return ( 
   <div className={`container ${styles.auth}`}>
-      
+      {isLoading && <Loader/>}
       <Card>
         <div className={styles.form}>
         
@@ -34,19 +69,32 @@ const loginUser = () => {
 
         <h2>Reset Password</h2>
         
-        <form onSubmit={loginUser}>
+        <form onSubmit={reset}>
         
-      <PasswordInput placeholder='Password' name='password' value={password} onChange={handleInputChange}/>
+      <PasswordInput 
+      placeholder='Password' 
+      name='password' 
+      value={password} 
+      onChange={handleInputChange}/>
 
-      <PasswordInput placeholder='Confirm Password' name='password2' value={password2} onChange={handleInputChange}/>  
+      <PasswordInput 
+      placeholder='Confirm Password' 
+      name='password2' 
+      value={password2} 
+      onChange={handleInputChange}/>  
         
 
-      <button type='submit' className="--btn --btn-primary --btn-block">Reset Password
+      <button type='submit' className="--btn --btn-primary --btn-block">
+        Reset Password
         </button>  
 
       <div className={styles.links}>
+        <p>
         <Link to='/'>- Home</Link>
+        </p>
+        <p>
         <Link to='/login'>- Login</Link>
+        </p>
       </div>
 
         </form>

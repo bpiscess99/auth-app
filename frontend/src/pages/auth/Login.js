@@ -71,7 +71,7 @@ useEffect(() => {
 
 const googleLogin = async (credentialResponse) => {
   console.log(credentialResponse);
-  console.log(googleLogin)
+  // console.log(googleLogin)
   await dispatch(
     loginWithGoogle({userToken: credentialResponse.credential})
   );

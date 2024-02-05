@@ -11,7 +11,7 @@ const PasswordInput = ({placeholder, name, value, onChange, onPaste}) => {
     }
   return (
 
-    <div className='password'>
+    <span className='password'>
       
       <input 
       type={showPassword ? "text" : "password"} 
@@ -26,7 +26,7 @@ const PasswordInput = ({placeholder, name, value, onChange, onPaste}) => {
       {showPassword ? (<AiOutlineEyeInvisible size={20}/>) : (<AiOutlineEye size={20}/>)}
       </div>
 
-    </div>
+    </span>
         
   )
 }

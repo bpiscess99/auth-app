@@ -6,7 +6,7 @@ import {toast} from 'react-toastify';
 const initialState = {
     isLoggedIn: false,
     user: null,
-    users: {},
+    users: [],
     twoFactor: false,
     isError: false,
     isSuccess: false,
@@ -558,8 +558,7 @@ const authSlice = createSlice({
     .addCase(getUsers.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        state.message = action.payload;
-        toast.success(action.payload);
+        state.users = action.payload;
     })
     .addCase(getUsers.rejected, (state, action) => {
         state.isLoading = false;
