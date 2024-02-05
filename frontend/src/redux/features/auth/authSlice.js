@@ -309,7 +309,7 @@ export const loginWithGoogle = createAsyncThunk(
     "auth/loginWithGoogle",
     async(userToken, thunkAPI) => {
         try {
-            return authService.loginWithGoogle(userToken);
+            return await authService.loginWithGoogle(userToken);
         } catch (error) {
             const message = 
             (error.response &&
