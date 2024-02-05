@@ -217,7 +217,7 @@ const sendLoginCode = asyncHandler(async(req, res) => {
     const subject = "Login Access Code - AUTH:Z";
     const send_to = email;
     const sent_from = process.env.EMAIL_USER;
-    const reply_to = "bumair9@gmail.com";
+    const reply_to = "bumair97@gmail.com";
     const template = "loginCode";
     const name = user.name;
     const link = decryptedLoginCode;
