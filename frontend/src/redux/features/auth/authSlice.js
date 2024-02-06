@@ -6,7 +6,7 @@ import {toast} from 'react-toastify';
 const initialState = {
     isLoggedIn: false,
     user: null,
-    users: [],
+    users: {},
     twoFactor: false,
     isError: false,
     isSuccess: false,
@@ -147,7 +147,7 @@ export const verifyUser = createAsyncThunk(
     "auth/verifyUser",
     async(verificationToken, thunkAPI) => {
         try {
-            return authService.verifyUser(verificationToken);            
+            return await authService.verifyUser(verificationToken);            
         } catch (error) {
             const message = 
             (error.response &&
@@ -165,7 +165,7 @@ export const changePassword = createAsyncThunk(
     "auth/changePassword",
     async(userData, thunkAPI) => {
         try {
-            return authService.changePassword(userData);
+            return await authService.changePassword(userData);
         } catch (error) {
             const message = 
             (error.response &&
@@ -183,7 +183,7 @@ export const forgotPassword = createAsyncThunk(
     "auth/forgotPassword",
     async (userData, thunkAPI) => {
         try {
-            return authService.forgotPassword(userData);
+            return await authService.forgotPassword(userData);
         } catch (error) {
             const message = 
             (error.response &&
@@ -201,7 +201,7 @@ export const resetPassword = createAsyncThunk(
     "auth/resetPassword",
     async ({userData, resetToken}, thunkAPI) => {
         try {
-            return authService.resetPassword(userData, resetToken   );
+            return await authService.resetPassword(userData, resetToken);
         } catch (error) {
             const message = 
             (error.response &&
@@ -219,7 +219,7 @@ export const getUsers = createAsyncThunk(
     "auth/getUsers",
     async(_, thunkAPI) => {
         try {
-            return authService.getUsers();
+            return await authService.getUsers();
         } catch (error) {
             const message = 
             (error.response &&
@@ -237,7 +237,7 @@ export const deleteUser = createAsyncThunk(
     "auth/deleteUser",
     async(id, thunkAPI) => {
         try {
-            return authService.deleteUser(id);
+            return await authService.deleteUser(id);
         } catch (error) {
             const message = 
             (error.response &&
@@ -255,7 +255,7 @@ export const upgradeUser = createAsyncThunk(
     "auth/upgradeUser",
     async(userData, thunkAPI) => {
         try {
-            return authService.upgradeUser(userData);
+            return await authService.upgradeUser(userData);
         } catch (error) {
             const message = 
             (error.response &&
@@ -273,7 +273,7 @@ export const sendLoginCode = createAsyncThunk(
     "auth/sendLoginCode",
     async(email, thunkAPI) => {
         try {
-            return authService.sendLoginCode(email);
+            return await authService.sendLoginCode(email);
         } catch (error) {
             const message = 
             (error.response &&
@@ -291,7 +291,7 @@ export const loginWithCode = createAsyncThunk(
     "auth/loginWithCode",
     async({code, email}, thunkAPI) => {
         try {
-            return authService.loginWithCode(code, email);
+            return await authService.loginWithCode(code, email);
         } catch (error) {
             const message =
             (error.response &&
@@ -558,7 +558,8 @@ const authSlice = createSlice({
     .addCase(getUsers.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        state.users = action.payload;
+        state.message = action.payload;
+        toast.success(action.payload);
     })
     .addCase(getUsers.rejected, (state, action) => {
         state.isLoading = false;
