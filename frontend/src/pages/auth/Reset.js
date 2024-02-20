@@ -21,8 +21,8 @@ const Reset = () => {
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const {resetToken} = useParams;
-    console.log(resetToken);
+    const {resetToken} = useParams();
+    console.log("in reset password ", resetToken);
 
     const {isLoading, isSuccess, message} = useSelector((state) => state.auth);
 

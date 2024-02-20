@@ -18,12 +18,12 @@ const initialState = {
 
 // Register User
 export const register = createAsyncThunk(
-    "auth/register",
+    "auth/register",    // auth is state and register is function variable
     async(userData, thunkAPI) => {
         try {
             return await authService.register(userData);
         } catch (error) {
-         const message = 
+         const message =  // this is because how different API's return the error message 
          (error.response &&
             error.response.data &&
             error.response.data.message) || 
@@ -323,7 +323,7 @@ export const loginWithGoogle = createAsyncThunk(
 );
 
 const authSlice = createSlice({
-    name: "auth",
+    name: "auth",  // name of auth
     initialState,
     reducers: {
         RESET(state){
@@ -362,6 +362,7 @@ const authSlice = createSlice({
             state.suspendedUsers = count;
         },
     },
+    // Below is how we receive the response
    extraReducers: (builder) => {
     builder
     // Register User
@@ -379,7 +380,7 @@ const authSlice = createSlice({
     .addCase(register.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
-        state.message = action.payload;
+        state.message = action.payload; // get error message from server
         state.user = null;
         toast.error(action.payload)
     })

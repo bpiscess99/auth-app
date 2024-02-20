@@ -31,7 +31,7 @@ const Register = () => {
     const navigate = useNavigate();
 
     const {isLoading, isLoggedIn, isSuccess, message} = useSelector(
-      (state) => state.auth
+      (state) => state.auth // useSelector is used to select the item(state) from redux
     );
 
     const [uCase, setUCase] = useState(false)

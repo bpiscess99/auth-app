@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BACKEND_URL = process.env.REACT_APP_SERVER_URL;
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export const API_URL = `${BACKEND_URL}/api/users/`;
 
 // Validate Email
@@ -14,7 +14,7 @@ export const validateEmail = (email) => {
 // Register User
 const register = async (userData) => {
     const response = await axios.post(API_URL + "register", userData,
-    {withCredentials: true}
+    {withCredentials: true} // will send token in cookie
     );
     console.log("response", response)
     return response.data;
@@ -87,9 +87,10 @@ const changePassword = async (userData) => {
 // Reset Password 
 const resetPassword = async (userData, resetToken) => {
     const response = await axios.patch(
-        `${API_URL}/resetPassword/${resetToken}`,
+        `${API_URL}resetPassword/${resetToken}`,
         userData
-    );
+        );
+        console.log("Auth Service", response)
     return response.data.message
 };
 

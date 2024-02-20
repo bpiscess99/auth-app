@@ -22,7 +22,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { loginStatus, getUser, selectIsLoggedIn, selectUser } from './redux/features/auth/authSlice';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
-axios.defaults.withCredentials = true;
+axios.defaults.withCredentials = true; // to send the token or credentials with every http request
 
 function App() {
   const dispatch = useDispatch();
