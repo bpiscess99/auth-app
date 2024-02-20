@@ -11,6 +11,7 @@ const sendEmail = require("../utils/sendEmail")
 const {OAuth2Client} = require("google-auth-library") // login with google
 
 const cryptr = new Cryptr(process.env.CRYPTR_KEY);
+// console.log("cryptr", cryptr)
 const client = new OAuth2Client({
     clientId: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET_KEY});
@@ -340,7 +341,7 @@ const sendVerificationEmail = asyncHandler(async (req, res) => {
         }).save();
 
         // construct Verification URL
-        const verificationUrl = `${process.env.FRONTEND_URL}/verify/${verificationToken}`
+        const verificationUrl = `${process.env.FRONTEND_URL}/verify/${hashedToken}`
 
         // Send Email
         const subject = "Verify Your Account - AUTH:Z"
@@ -582,19 +583,22 @@ const loginStatus = asyncHandler(async (req, res) => {
 
         // Create verification Token and Save
         const resetToken = crypto.randomBytes(32).toString("hex") + user._id;
-        console.log(resetToken);
+        console.log("reset token is ", resetToken);
         
         // Hash token and save
         const hashedToken = hashToken(resetToken);
+        console.log("hashed token is ", hashedToken)
         await new Token({
             userId: user._id,
             rToken: hashedToken,
             createdAt: Date.now(),
             expiresAt: Date.now() + 60 * (60 * 1000), 
         }).save();
-
+               
+        console.log("got hashed token ", hashedToken)
         // Construct Reset Url
-        const resetUrl = `${process.env.FRONTEND_URL}/resetPassword/${resetToken}`;
+        const resetUrl = `${process.env.FRONTEND_URL}/resetPassword/${hashedToken}`;
+        console.log("resetUrl", resetUrl)
 
         // Send Email
         const subject = "Password Reset Request - AUTH:Z";
@@ -615,7 +619,7 @@ const loginStatus = asyncHandler(async (req, res) => {
             name,
             link
          );
-         res.status(200).json({message: "Password Reset Email Sent"});     
+         res.status(200).json({message: "Password Reset Email Sent",});     
         } catch (error) {
             res.status(500);
             throw new Error("Email not sent, please try again")
@@ -627,8 +631,8 @@ const loginStatus = asyncHandler(async (req, res) => {
     const resetPassword = asyncHandler(async(req, res) => {
         const {resetToken} = req.params;
         const {password} = req.body;
-       console.log(resetToken);
-       console.log(password);
+       console.log("Reset password hashed token is ", resetToken);
+    //    console.log(password);
         
     //    const hashedToken = hashToken(resetToken);
 
@@ -636,7 +640,7 @@ const loginStatus = asyncHandler(async (req, res) => {
         rToken: resetToken,
         expiresAt: {$gt: Date.now()}
        });
-
+         console.log("In reset Password hashed token is ", resetToken);
        if(!userToken){
         res.status(404)
         throw new Error('Invalid or Expired Token');
@@ -649,8 +653,9 @@ const loginStatus = asyncHandler(async (req, res) => {
     user.password = password;
     await user.save();
 
-    res.status(200).json({message: "Password Reset Successfully, Please Login"})
-
+    res.status(200).json({
+        message: "Password Reset Successfully, Please Login"
+    })
     });
 
     // Change Password
@@ -689,7 +694,7 @@ const loginStatus = asyncHandler(async (req, res) => {
         });
 
         const payload = ticket.getPayload();
-        console.log('Token Audience:', payload.aud);
+        console.log('Token Audience:', payload);
         const {name, email, picture, sub} = payload;
         const password = Date.now() + sub;
         
