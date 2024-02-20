@@ -6,7 +6,7 @@ import {toast} from 'react-toastify';
 const initialState = {
     isLoggedIn: false,
     user: null,
-    users: {},
+    users: [],
     twoFactor: false,
     isError: false,
     isSuccess: false,

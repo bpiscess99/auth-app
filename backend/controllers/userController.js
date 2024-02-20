@@ -341,7 +341,7 @@ const sendVerificationEmail = asyncHandler(async (req, res) => {
         }).save();
 
         // construct Verification URL
-        const verificationUrl = `${process.env.FRONTEND_URL}/verify/${verificationToken}`
+        const verificationUrl = `${process.env.FRONTEND_URL}/verify/${hashedToken}`
 
         // Send Email
         const subject = "Verify Your Account - AUTH:Z"
@@ -694,7 +694,7 @@ const loginStatus = asyncHandler(async (req, res) => {
         });
 
         const payload = ticket.getPayload();
-        console.log('Token Audience:', payload.aud);
+        console.log('Token Audience:', payload);
         const {name, email, picture, sub} = payload;
         const password = Date.now() + sub;
         

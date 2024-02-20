@@ -15,7 +15,7 @@ const Verify = () => {
      await dispatch(verifyUser(verificationToken))
      await dispatch(RESET())
   }
-  console.log("verifyAccount", verifyAccount)
+  // console.log("verifyAccount", verifyAccount)
   return (
     <section>
      {isLoading && <Loader/>}

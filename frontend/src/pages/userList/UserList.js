@@ -23,7 +23,7 @@ const UserList = () => {
 
   const {users, isLoading, isLoggedIn, isSuccess, message} = useSelector((state) => state.auth);
   const filteredUsers = useSelector(selectUsers);
-  // console.log("filtered Users", filteredUsers);
+  console.log("filtered Users", filteredUsers);
   // console.log("users", users)
 
   useEffect(() => {
@@ -53,6 +53,8 @@ const UserList = () => {
   };
 
   useEffect(() => {
+    console.log("Dispatching FILTER_USERS with payload:", {users, search});
+
     dispatch(FILTER_USERS({users, search}))
   }, [dispatch, users, search]);
   
