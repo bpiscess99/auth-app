@@ -21,9 +21,9 @@ const UserList = () => {
   
   const [search, setSearch] = useState("");
 
-  const {users, isLoading, isLoggedIn, isSuccess, message} = useSelector((state) => state.auth);
+  const {users, isLoading} = useSelector((state) => state.auth);
   const filteredUsers = useSelector(selectUsers);
-  console.log("filtered Users", filteredUsers);
+  // console.log("filtered Users", filteredUsers);
   // console.log("users", users)
 
   useEffect(() => {
@@ -32,7 +32,7 @@ const UserList = () => {
 
   const removeUser = async (id) => {
     await dispatch(deleteUser(id));
-    dispatch(getUsers());
+    await dispatch(getUsers());
   };
 
   const confirmDelete = async(id) => {

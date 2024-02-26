@@ -13,7 +13,8 @@ import useRedirectLoggedOutUser from '../../customHook/useRedirectLoggedOutUser'
 import { useDispatch, useSelector } from 'react-redux';
 import Notification from '../../components/notification/Notification';
 
-// provide a shortened version of a text, ensuring it does not exceed a specified maximum length, and appending an ellipsis if needed.
+// provide a shortened version of a text, ensuring it does not exceed a specified maximum length, 
+// and appending an ellipsis if needed.
 
 export const shortenText = (text, n) => {
   if(text.length > n){
@@ -26,7 +27,7 @@ export const shortenText = (text, n) => {
 const Profile = () => {
    useRedirectLoggedOutUser("/login");
    const dispatch = useDispatch();
-   const {isLoading, isLoggedIn, IsSuccess, user, message} = useSelector(
+   const {isLoading, user} = useSelector(
     (state) => state.auth
    );
 
@@ -98,9 +99,6 @@ const saveProfile = async (e) => {
   }
 };
 
-// useLayoutEffect(() => {
-//  dispatch(getUser());  
-// }, [dispatch])
 
 useLayoutEffect(() => {
   if(user){
