@@ -5,16 +5,18 @@ const {generateToken, hashToken} = require("../utils/index");
 const bcrypt = require("bcryptjs");
 const Token = require("../models/tokenModel");
 const Cryptr = require("cryptr"); // this is use to encryption and decryption the string
-const jwt = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");    
 const crypto = require("crypto"); // generate cryptographic keys, hashing data and encrypting/decrypting data
 const sendEmail = require("../utils/sendEmail")
 const {OAuth2Client} = require("google-auth-library") // login with google
 
 const cryptr = new Cryptr(process.env.CRYPTR_KEY);
 // console.log("cryptr", cryptr)
+// const client = new  OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const client = new OAuth2Client({
     clientId: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.CLIENT_SECRET_KEY});
+    clientSecret: process.env.CLIENT_SECRET_KEY
+});
 
 const registerUser = asyncHandler(async(req, res) => {
     const {name, email, password} = req.body;

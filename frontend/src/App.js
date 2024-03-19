@@ -35,7 +35,8 @@ function App() {
     dispatch(getUser());
    }
   }, [dispatch, isLoggedIn, user])
-
+  // const GoogleOAuthProviderComponent = process.env.REACT_APP_GOOGLE_CLIENT_ID
+  //   console.log('Google Client ID:', GoogleOAuthProviderComponent );
   
   return (
     <>
